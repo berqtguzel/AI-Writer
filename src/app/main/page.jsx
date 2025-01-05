@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const savedInput = localStorage.getItem("input");
@@ -49,6 +52,13 @@ export default function Home() {
     }
   };
 
+  const handleLogout = () => {
+    Cookies.remove("authToken");
+    localStorage.removeItem("input");
+    localStorage.removeItem("response");
+    router.push("/login");
+  };
+
   return (
     <div className="p-10 max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold mb-6 text-center">OpenAI Chatbot</h1>
@@ -83,6 +93,14 @@ export default function Home() {
           <p className="mt-2">{response}</p>
         </div>
       )}
+      <div className="mt-10 text-center">
+        <button
+          onClick={handleLogout}
+          className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-sm"
+        >
+          Çıkış Yap
+        </button>
+      </div>
     </div>
   );
 }
