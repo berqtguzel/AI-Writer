@@ -17,7 +17,6 @@ export default function Login() {
       const user = result.user;
       const token = await user.getIdToken();
 
-      // Token'ı çerezlere kaydet
       Cookies.set("authToken", token, { expires: 1 });
 
       router.push("/main");
@@ -29,18 +28,18 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-6 text-orange-500">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 via-black to-gray-900">
+      <div className="bg-gray-800 p-10 rounded-2xl shadow-2xl w-full max-w-md">
+        <h1 className="text-4xl font-extrabold text-center mb-6 text-orange-400 drop-shadow-lg">
           AI-Writer'e Hoşgeldin
         </h1>
-        <p className="text-center text-gray-400 mb-8">
+        <p className="text-center text-gray-300 text-lg mb-8">
           Devam etmek için giriş yap
         </p>
         <div className="flex justify-center">
           <button
             onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out"
+            className="w-full flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out"
             disabled={loading}
           >
             {loading ? (
