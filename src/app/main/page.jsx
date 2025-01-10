@@ -16,12 +16,15 @@ export default function Home() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState([]);
-  const [currentChatHistory, setCurrentChatHistory] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
     fetchSearchHistory(setHistory);
   }, []);
+
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,12 +49,11 @@ export default function Home() {
 
       const data = await res.json();
       setResponse(data.result);
-      const newHistoryItem = {
-        id: Date.now().toString(),
-        input,
-        response: data.result,
-      };
-      setCurrentChatHistory([...currentChatHistory, newHistoryItem]);
+      const newHistory = [
+        ...history,
+        { id: Date.now().toString(), input, response: data.result },
+      ];
+      setHistory(newHistory);
 
       // Firebase Database'e kaydet
       await saveSearch(input, data.result);
@@ -70,8 +72,7 @@ export default function Home() {
   };
 
   const handleNewChat = () => {
-    setHistory([...history, ...currentChatHistory]);
-    setCurrentChatHistory([]);
+    setHistory([]);
     setInput("");
     setResponse("");
   };
@@ -79,7 +80,6 @@ export default function Home() {
   const handleSelectHistory = (item) => {
     setInput(item.input);
     setResponse(item.response);
-    setCurrentChatHistory([item]);
   };
 
   const handleDeleteHistory = async (id) => {
@@ -93,19 +93,19 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
-      <div className="w-64 bg-gray-800 p-4">
-        <h2 className="text-lg font-semibold text-orange-500 mb-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-800 via-black to-gray-900 text-white flex">
+      <div className="w-72 bg-gray-700 p-6 rounded-lg m-4 flex flex-col justify-between shadow-lg">
+        <h2 className="text-lg font-bold text-orange-500 mb-4">
           Geçmiş Aramalar
         </h2>
-        <div className="space-y-2">
+        <div className="space-y-3 overflow-y-auto custom-scrollbar flex-grow">
           {history.map((item, index) => (
             <div
               key={index}
-              className="p-2 bg-gray-700 rounded-lg flex justify-between items-center cursor-pointer hover:bg-gray-600"
+              className="p-3 bg-gray-600 rounded-lg flex justify-between items-center cursor-pointer hover:bg-gray-500"
             >
               <p
-                className="text-sm text-gray-300"
+                className="text-sm text-gray-300 truncate w-4/5"
                 onClick={() => handleSelectHistory(item)}
               >
                 {item.input}
@@ -120,45 +120,50 @@ export default function Home() {
           ))}
         </div>
       </div>
+
       <div className="flex-grow flex flex-col justify-between p-10">
         <div className="max-w-2xl mx-auto w-full">
-          <h1 className="text-4xl font-bold mb-6 text-center text-orange-500">
+          <h1 className="text-5xl font-extrabold mb-6 text-center text-orange-400 drop-shadow-lg">
             AI-Writer
           </h1>
           <div className="space-y-4 mb-6 overflow-y-auto max-h-[70vh] custom-scrollbar">
-            {currentChatHistory.map((item, index) => (
-              <div key={index} className="p-4 rounded-lg shadow-sm">
+            {response && (
+              <div className="p-4 rounded-lg shadow-lg">
                 <div className="bg-gray-800 p-4 rounded-lg mb-2">
-                  <h2 className="text-lg font-semibold text-orange-500">
-                    Siz:
-                  </h2>
-                  <p className="mt-2">{item.input}</p>
+                  <h2 className="text-lg font-bold text-orange-400">Siz:</h2>
+                  <p className="mt-2">
+                    {history.length > 0
+                      ? history[history.length - 1].input
+                      : ""}
+                  </p>
                 </div>
                 <div className="bg-gray-700 p-4 rounded-lg">
-                  <h2 className="text-lg font-semibold text-orange-500">
+                  <h2 className="text-lg font-bold text-orange-400">
                     Yapay Zeka:
                   </h2>
-                  <p className="mt-2">{item.response}</p>
+                  <p className="mt-2">{response}</p>
                 </div>
               </div>
-            ))}
+            )}
           </div>
           <form
             onSubmit={handleSubmit}
-            className="flex space-x-4 fixed bottom-0 left-0 w-full bg-black p-4"
+            className=" flex space-x-4 w-120 bg-gradient-to-r from-gray-700 to-gray-800 p-5 rounded-xl shadow-lg fixed bottom-4 left-4 right-4"
           >
             <input
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="flex-grow p-4 border border-orange-500 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-800 text-white"
+              onChange={handleInputChange}
+              className="flex-grow p-4 border border-orange-400 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-900 text-white placeholder-gray-400 "
               placeholder="Sorunuzu yazın..."
               disabled={isLoading}
             />
             <button
               type="submit"
-              className={`py-3 px-6 rounded-lg text-white font-semibold ${
-                isLoading ? "bg-gray-500" : "bg-orange-500 hover:bg-orange-600"
+              className={`py-3 px-8 rounded-full text-white font-semibold shadow-lg transition-transform duration-300 transform ${
+                isLoading
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-orange-500 hover:bg-orange-600 hover:scale-105"
               }`}
               disabled={isLoading}
             >
@@ -172,20 +177,20 @@ export default function Home() {
           )}
         </div>
 
-        <div className="fixed bottom-4 right-4 flex flex-col space-y-4">
+        <div className="fixed bottom-50 right-4 flex flex-col space-y-4">
           <button
             onClick={handleLogout}
-            className="p-4 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 transition duration-300 ease-in-out flex items-center space-x-2"
+            className="p-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105 flex items-center space-x-3"
           >
-            <FiLogOut className="h-5 w-5" />
-            <span>Çıkış Yap</span>
+            <FiLogOut className="h-6 w-6" />
+            <span className="text-lg font-medium">Çıkış Yap</span>
           </button>
 
           <button
             onClick={handleNewChat}
-            className="p-4 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition duration-300 ease-in-out flex items-center space-x-2"
+            className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105 flex items-center space-x-3"
           >
-            <span>Yeni Chat</span>
+            <span className="text-lg font-medium">Yeni Chat</span>
           </button>
         </div>
       </div>
