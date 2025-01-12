@@ -5,7 +5,6 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { FiLogOut, FiTrash2 } from "react-icons/fi";
 import { RiChat4Fill } from "react-icons/ri";
-// Çıkış ve silme ikonları için react-icons'dan import
 import {
   saveSearch,
   fetchSearchHistory,
@@ -23,12 +22,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const storedHistory = localStorage.getItem("history");
-    if (storedHistory) {
-      setHistory(JSON.parse(storedHistory));
-    } else {
-      fetchSearchHistory(setHistory);
-    }
+    fetchSearchHistory(setHistory);
   }, []);
 
   useEffect(() => {
@@ -160,7 +154,7 @@ export default function Home() {
                 </div>
                 <div className="bg-gray-700 p-4 rounded-lg">
                   <h2 className="text-lg font-bold text-orange-400">
-                    AI-Wrtiter:
+                    Yapay Zeka:
                   </h2>
                   <p className="mt-2">{item.response}</p>
                 </div>

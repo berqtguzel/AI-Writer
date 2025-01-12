@@ -1,16 +1,16 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import { getDatabase } from "firebase/database"; // Realtime Database için import
 
 // Firebase yapılandırma bilgileri
 const firebaseConfig = {
-    apiKey: "AIzaSyCcMDFOPceKG2ayD2k3Ijvb9t3KcENwTmc",
-    authDomain: "ai-writer-36278.firebaseapp.com",
-    projectId: "ai-writer-36278",
-    databaseURL: "https://ai-writer-36278-default-rtdb.firebaseio.com", // Realtime Database URL
-    messagingSenderId: "399723950608",
-    appId: "1:399723950608:web:cc739a7fa07d7a4db4d095",
-    measurementId: "G-31Y5DLHT2G"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Firebase'i başlat
@@ -23,4 +23,16 @@ const googleProvider = new GoogleAuthProvider();
 // Realtime Database modülü
 const database = getDatabase(app);
 
-export { auth, googleProvider, database };
+const getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        resolve(user);
+      } else {
+        reject("No user logged in");
+      }
+    });
+  });
+};
+
+export { auth, googleProvider, database, getCurrentUser };

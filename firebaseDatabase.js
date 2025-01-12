@@ -1,40 +1,46 @@
-import { database } from "./firebase";
-import { ref, push, set, onValue, remove } from "firebase/database";
+import { ref, set, get, child, remove } from "firebase/database";
+import { database, getCurrentUser } from "./firebase";
 
-// Veri Yazma İşlevi
 export const saveSearch = async (input, response) => {
-  const searchRef = ref(database, "searches/");
-  const newSearchRef = push(searchRef);
-
-  await set(newSearchRef, {
-    input,
-    response,
-    timestamp: Date.now(),
-  });
-
-  console.log("Arama kaydedildi!");
+  try {
+    const user = await getCurrentUser();
+    const userId = user.uid;
+    const searchId = Date.now().toString();
+    await set(ref(database, `searches/${userId}/${searchId}`), {
+      id: searchId,
+      input,
+      response,
+    });
+  } catch (error) {
+    console.error("Error saving search:", error);
+  }
 };
 
-// Veri Okuma İşlevi
-export const fetchSearchHistory = (callback) => {
-  const searchRef = ref(database, "searches/");
-  onValue(searchRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      const history = Object.keys(data).map((key) => ({
-        id: key,
-        ...data[key],
-      }));
-      callback(history);
+export const fetchSearchHistory = async (setHistory) => {
+  try {
+    const user = await getCurrentUser();
+    const userId = user.uid;
+    const dbRef = ref(database);
+    const snapshot = await get(child(dbRef, `searches/${userId}`));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const historyArray = Object.keys(data).map((key) => data[key]);
+      setHistory(historyArray);
     } else {
-      callback([]);
+      setHistory([]);
     }
-  });
+  } catch (error) {
+    console.error("Error fetching search history:", error);
+    setHistory([]);
+  }
 };
 
-// Veri Silme İşlevi
 export const deleteSearch = async (id) => {
-  const searchRef = ref(database, `searches/${id}`);
-  await remove(searchRef);
-  console.log("Arama silindi!");
+  try {
+    const user = await getCurrentUser();
+    const userId = user.uid;
+    await remove(ref(database, `searches/${userId}/${id}`));
+  } catch (error) {
+    console.error("Error deleting search:", error);
+  }
 };
