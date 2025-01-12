@@ -192,7 +192,7 @@ export default function Home() {
           )}
         </div>
 
-        <div className="fixed bottom-50 right-4 flex flex-col space-y-4">
+        <div className="fixed bottom-49 right-4 flex flex-col space-y-4">
           <button
             onClick={handleLogout}
             className="p-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105 flex items-center space-x-3"
