@@ -10,10 +10,16 @@ export function middleware(req) {
     return NextResponse.redirect(url);
   }
 
+  // Eğer authToken varsa /login sayfasına erişimi engelle
+  if (token && url.pathname === '/login') {
+    url.pathname = '/main';
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
 
 // Sadece belirli rotalarda çalışacak
 export const config = {
-  matcher: ['/main'], // Sadece /main rotasını kontrol eder
+  matcher: ['/main', '/login'], // /main ve /login rotalarını kontrol eder
 };
