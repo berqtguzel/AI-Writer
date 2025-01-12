@@ -160,7 +160,7 @@ export default function Home() {
                 </div>
                 <div className="bg-gray-700 p-4 rounded-lg">
                   <h2 className="text-lg font-bold text-orange-400">
-                    Yapay Zeka:
+                    AI-Wrtiter:
                   </h2>
                   <p className="mt-2">{item.response}</p>
                 </div>
