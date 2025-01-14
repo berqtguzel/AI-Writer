@@ -19,15 +19,34 @@ export default function Home() {
   const [history, setHistory] = useState([]);
   const [currentChatHistory, setCurrentChatHistory] = useState([]);
   const [isSearchDisabled, setIsSearchDisabled] = useState(false);
+  const [searchCount, setSearchCount] = useState(0);
+  const [lastSearchDate, setLastSearchDate] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     fetchSearchHistory(setHistory);
+
+    // Yerel depolamadan arama sayısını ve son arama tarihini yükleyin
+    const storedSearchCount = localStorage.getItem("searchCount");
+    const storedLastSearchDate = localStorage.getItem("lastSearchDate");
+
+    if (storedSearchCount) {
+      setSearchCount(parseInt(storedSearchCount, 10));
+    }
+
+    if (storedLastSearchDate) {
+      setLastSearchDate(new Date(storedLastSearchDate));
+    }
   }, []);
 
   useEffect(() => {
     localStorage.setItem("history", JSON.stringify(history));
   }, [history]);
+
+  useEffect(() => {
+    localStorage.setItem("searchCount", searchCount);
+    localStorage.setItem("lastSearchDate", lastSearchDate);
+  }, [searchCount, lastSearchDate]);
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
@@ -36,6 +55,23 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    // Günlük arama limitini kontrol edin
+    const now = new Date();
+    if (
+      lastSearchDate &&
+      now.toDateString() !== new Date(lastSearchDate).toDateString()
+    ) {
+      // Yeni bir gün, arama sayısını sıfırlayın
+      setSearchCount(0);
+      setLastSearchDate(now);
+    }
+
+    if (searchCount >= 5) {
+      setError("Günlük arama limitinizi aştınız. Lütfen yarın tekrar deneyin.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -69,6 +105,10 @@ export default function Home() {
 
       // Arama yapıldıktan sonra input alanını devre dışı bırak
       setIsSearchDisabled(true);
+
+      // Arama sayısını artırın ve son arama tarihini güncelleyin
+      setSearchCount(searchCount + 1);
+      setLastSearchDate(now);
     } catch (err) {
       console.error("Hata detayı:", err);
       setError(`Hata: ${err.message}`);
@@ -138,7 +178,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <div className="flex flex-row mt-2 md:flex-row md:space-y-0 md:space-x-4">
+        <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
           <button
             onClick={handleLogout}
             className="p-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105 flex items-center space-x-2 text-sm"
